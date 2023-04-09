@@ -35,7 +35,7 @@ app.post("/participants", async (req, res) => {
         const timestamp = Date.now()
         await db.collection("participants").insertOne({ name, lastStatus: timestamp })
 
-        const message = { from: name, to: 'Todos', text: 'entra na sala...', type: 'status', time: dayjs(timestamp, "HH:MM:SS") }
+        const message = { from: name, to: 'Todos', text: 'entra na sala...', type: 'status', time: dayjs(timestamp).format("HH:mm:ss") }
         await db.collection("messages").insertOne(message)
 
         return res.sendStatus(201)
@@ -44,6 +44,14 @@ app.post("/participants", async (req, res) => {
     }
 })
 
+app.get("/participants", async (req, res) => {
+    try {
+        const participants = await db.collection("participants").find().toArray()
+        res.send(participants)
+    } catch (err) {
+        res.status(500).send(err.message)
+    }
+})
 
 const PORT = 5000
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`))
