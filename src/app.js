@@ -87,10 +87,19 @@ app.get("/messages", async (req, res) => {
     if (limit !== undefined && (numberLimit <= 0 || isNaN(numberLimit))) return res.sendStatus(422)
 
     try {
+        if (numberLimit) {
+            const messages = await db
+                .collection("messages")
+                .find({ $or: [{ type: "message" }, { to: user, type: "private_message" }, { from: user, type: "private_message" }] })
+                .limit(numberLimit)
+                .toArray()
+
+            return res.send(messages)
+        }
+
         const messages = await db
             .collection("messages")
             .find({ $or: [{ type: "message" }, { to: user, type: "private_message" }, { from: user, type: "private_message" }] })
-            .limit(numberLimit)
             .toArray()
 
         res.send(messages)
