@@ -1,7 +1,7 @@
 import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
-import { MongoClient } from "mongodb"
+import { MongoClient, ObjectId } from "mongodb"
 import joi from "joi"
 import dayjs from "dayjs"
 
@@ -100,6 +100,20 @@ app.get("/messages", async (req, res) => {
 
 app.post("/status", async (req, res) => {
     const { user } = req.headers
+
+    if (!user) return res.sendStatus(404)
+
+    try {
+        const result = await db
+            .collection("participants")
+            .updateOne({ name: user }, { $set: { lastStatus: Date.now() } })
+
+        if (result.matchedCount === 0) return res.sendStatus(404)
+
+        return res.sendStatus(200)
+    } catch (err) {
+        res.status(500).send(err.message)
+    }
 })
 
 const PORT = 5000
