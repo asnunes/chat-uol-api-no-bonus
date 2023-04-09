@@ -80,12 +80,26 @@ app.post("/messages", async (req, res) => {
 })
 
 app.get("/messages", async (req, res) => {
+    const { user } = req.headers
+    const limit = Number(req.query.limit)
+
+    if (limit && (limit <= 0 || isNaN(limit))) return res.sendStatus(422)
+
     try {
-        const messages = await db.collection("messages").find().toArray()
+        const messages = await db
+            .collection("messages")
+            .find({ $or: [{ type: "message" }, { to: user, type: "private_message" }, { from: user, type: "private_message" }] })
+            .limit(limit)
+            .toArray()
+
         res.send(messages)
     } catch (err) {
         res.status(500).send(err.message)
     }
+})
+
+app.post("/status", async (req, res) => {
+    const { user } = req.headers
 })
 
 const PORT = 5000
