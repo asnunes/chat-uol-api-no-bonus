@@ -81,15 +81,16 @@ app.post("/messages", async (req, res) => {
 
 app.get("/messages", async (req, res) => {
     const { user } = req.headers
-    const limit = Number(req.query.limit)
+    const { limit } = req.query
+    const numberLimit = Number(limit)
 
-    if (limit && (limit <= 0 || isNaN(limit))) return res.sendStatus(422)
+    if (limit !== undefined && (numberLimit <= 0 || isNaN(numberLimit))) return res.sendStatus(422)
 
     try {
         const messages = await db
             .collection("messages")
             .find({ $or: [{ type: "message" }, { to: user, type: "private_message" }, { from: user, type: "private_message" }] })
-            .limit(limit)
+            .limit(numberLimit)
             .toArray()
 
         res.send(messages)
