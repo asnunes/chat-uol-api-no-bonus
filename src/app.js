@@ -89,7 +89,7 @@ app.get("/messages", async (req, res) => {
     try {
         const messages = await db
             .collection("messages")
-            .find({ $or: [{ from: user }, { to: { $in: [user, "Todos"] }}, { type: "message" }] })
+            .find({ $or: [{ from: user }, { to: { $in: [user, "Todos"] } }, { type: "message" }] })
             .limit(numberLimit)
             .toArray()
 
@@ -120,7 +120,6 @@ app.post("/status", async (req, res) => {
 // Remoção de usuários inativos
 setInterval(async () => {
     const tenSecondsAgo = Date.now() - 10000
-    let messages = []
 
     try {
         const inactive = await db
@@ -129,13 +128,13 @@ setInterval(async () => {
             .toArray()
 
         if (inactive.length > 0) {
-            messages = inactive.map(inactive => {
+            const messages = inactive.map(inactive => {
                 return { from: inactive.name, to: 'Todos', text: 'sai da sala...', type: 'status', time: dayjs().format("HH:mm:ss") }
             })
-        }
 
-        await db.collection("messages").insertMany(messages)
-        await db.collection("participants").deleteMany({ lastStatus: { $lte: tenSecondsAgo } })
+            await db.collection("messages").insertMany(messages)
+            await db.collection("participants").deleteMany({ lastStatus: { $lte: tenSecondsAgo } })
+        }
     } catch (err) {
         console.log(err)
     }
