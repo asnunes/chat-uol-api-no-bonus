@@ -120,7 +120,7 @@ app.post("/status", async (req, res) => {
 // Remoção de usuários inativos
 setInterval(async () => {
     const tenSecondsAgo = Date.now() - 10000
-    const messages = []
+    let messages = []
 
     try {
         const inactive = await db
